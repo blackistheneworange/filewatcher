@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/blackistheneworange/filewatcher/utils"
+	"github.com/blackistheneworange/filewatcher/utils/process"
 	"github.com/blackistheneworange/filewatcher/utils/filesystem"
 	"github.com/blackistheneworange/filewatcher/utils/logger"
 )
@@ -19,9 +20,9 @@ func main() {
 		panic(logger.Format(0, watcherErr.Error()))
 	}
 
-	process, processErr := createProcess(execCmd)
-	if processErr != nil {
-		panic(logger.Format(0, processErr.Error()))
+	processManager, processManagerErr := process.GetProcessManager(execCmd)
+	if processManagerErr != nil {
+		panic(logger.Format(0, processManagerErr.Error()))
 	}
 
 	watchDirPath, watchDirPathErr := utils.GetWatchPath(watchDir)
@@ -36,7 +37,7 @@ func main() {
 
 	logger.Log("Listening for changes...")
 
-	handleProcessError(process.Execute())
+	handleProcessError(processManager.StartProcess())
 
 	ch := watcher.Subscribe()
 	go watcher.Watch(watchDirPath, ignorePaths)
@@ -53,7 +54,7 @@ func main() {
 			}
 			logger.Log("Restarting...")
 
-			handleProcessError(process.Execute())
+			handleProcessError(processManager.StartProcess())
 		}
 	}
 }
