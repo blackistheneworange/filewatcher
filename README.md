@@ -14,7 +14,7 @@ A simple utility to watch and restart on directory changes. Only supported in wi
 > The directory to be watched. This path should always point to a directory
 
 ### -ignore
-> CSV of files to ignore when watching
+> CSV of files and directories to ignore when watching
 
 
 ## Additional Information
