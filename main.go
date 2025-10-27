@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"github.com/blackistheneworange/filewatcher/utils"
-	"github.com/blackistheneworange/filewatcher/utils/process"
 	"github.com/blackistheneworange/filewatcher/utils/filesystem"
 	"github.com/blackistheneworange/filewatcher/utils/logger"
+	"github.com/blackistheneworange/filewatcher/utils/process"
 )
 
 var execCmd *string = flag.String("exec", "", "Command to execute")
