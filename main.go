@@ -24,6 +24,7 @@ func main() {
 	if processManagerErr != nil {
 		panic(logger.Format(0, processManagerErr.Error()))
 	}
+	process := processManager.CreateProcess(*execCmd)
 
 	watchDirPath, watchDirPathErr := utils.GetWatchPath(watchDir)
 	if watchDirPathErr != nil {
@@ -37,7 +38,7 @@ func main() {
 
 	logger.Log("Listening for changes...")
 
-	handleProcessError(processManager.StartProcess())
+	handleProcessError(process.StartProcess())
 
 	ch := watcher.Subscribe()
 	go watcher.Watch(watchDirPath, ignorePaths)
@@ -54,7 +55,7 @@ func main() {
 			}
 			logger.Log("Restarting...")
 
-			handleProcessError(processManager.StartProcess())
+			handleProcessError(process.StartProcess())
 		}
 	}
 }
