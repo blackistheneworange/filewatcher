@@ -47,7 +47,7 @@ func FileNotifyInformationParser(buffer [4096]byte, watchDirPath string, ignoreP
 		case windows.FILE_ACTION_REMOVED :
 			action = filename+" removed"
 		case windows.FILE_ACTION_MODIFIED:
-			dupEvent, dupEventErr := isDuplicateEvent(absPath)
+			dupEvent, dupEventErr := isDuplicateModifiedEvent(absPath)
 			if dupEventErr != nil {
 				return []string{}, dupEventErr
 			}
@@ -87,7 +87,7 @@ func isValidEvent(absPath string, ignorePaths []string) bool {
 	return true
 }
 
-func isDuplicateEvent(absPath string) (bool, error) {
+func isDuplicateModifiedEvent(absPath string) (bool, error) {
 	stat, statErr := os.Stat(absPath)
 
 	if statErr != nil {
@@ -100,8 +100,8 @@ func isDuplicateEvent(absPath string) (bool, error) {
 
 	if !stat.IsDir() && (!ok || currModTime.Sub(metadata.ModTime) > debounceModTime) {
 		cache[absPath] = MetaData{ ModTime: currModTime }
-		return true, nil
+		return false, nil
 	}
 
-	return false, nil
+	return true, nil
 }
