@@ -66,6 +66,7 @@ func main() {
 
 func handleProcessError(err error) {
 	if err != nil {
-		logger.Log(err, "Process crashed. Waiting for changes...")
+		logger.Log(err)
+		logger.Log("Process crashed. Waiting for changes...")
 	}
 }
