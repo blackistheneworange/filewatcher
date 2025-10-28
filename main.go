@@ -35,6 +35,7 @@ func main() {
 	if ignorePathsErr != nil {
 		logger.Fatal(logger.Format(0, ignorePathsErr))
 	}
+	segregatedIgnorePaths := utils.SegregateIgnorePaths(ignorePaths, watchDirPaths)
 
 	logger.Log("Listening for changes...")
 
@@ -42,8 +43,8 @@ func main() {
 	
 	ch := watcher.Subscribe()
 
-	for _, watchDirPath := range watchDirPaths {
-		go watcher.Watch(watchDirPath, ignorePaths)
+	for idx, watchDirPath := range watchDirPaths {
+		go watcher.Watch(watchDirPath, segregatedIgnorePaths[idx])
 	}
 
 	for {

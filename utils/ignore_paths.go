@@ -36,3 +36,18 @@ func GetIgnorePaths(paths *string) ([]string, error) {
 
 	return finalPathsList, nil
 }
+
+func SegregateIgnorePaths(ignorePaths []string, watchDirPaths []string) [][]string {
+	segregatedList := make([][]string, len(watchDirPaths))
+
+	for _, ignorePath := range ignorePaths {
+		for idx, watchDirPath := range watchDirPaths {
+			if strings.HasPrefix(ignorePath, watchDirPath) {
+				segregatedList[idx] = append(segregatedList[idx], ignorePath)
+				break;
+			}
+		}
+	}
+
+	return segregatedList
+}
