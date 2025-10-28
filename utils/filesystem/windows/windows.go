@@ -5,7 +5,6 @@ package windows
 
 import (
 	"golang.org/x/sys/windows"
-	"github.com/blackistheneworange/filewatcher/utils/logger"
 	fs_types "github.com/blackistheneworange/filewatcher/utils/filesystem/types"
 )
 
@@ -33,7 +32,7 @@ func closeHandle(handle windows.Handle) {
 func (watcher *WindowsFileSystemWatcher) Watch(watchDirPath string, ignorePaths []string) {
 	handle, handleErr := getHandle(watchDirPath)
 	if handleErr != nil {
-		panic(logger.Format(' ', "filesystem handle error:",handleErr))
+		watcher.EmitWatchUpdate([]string{}, handleErr)
 	}
 	defer closeHandle(handle)
 
@@ -50,19 +49,19 @@ func (watcher *WindowsFileSystemWatcher) Watch(watchDirPath string, ignorePaths 
 			0,
 		)
 
-		if watcher.WatchUpdateChannel != nil {
-			if err != nil {
-				watcher.WatchUpdateChannel <- WatchUpdate{ Error: err }
-			} else {
-				actions, parseErr := FileNotifyInformationParser(watcher.Buffer, watchDirPath, ignorePaths)
-				
-				if(parseErr != nil) {
-					watcher.WatchUpdateChannel <- WatchUpdate{ Error: parseErr }
-				} else {
-					watcher.WatchUpdateChannel <- WatchUpdate{ Error: nil, Actions: actions }
-				}
-			}
+		if err != nil {
+			watcher.EmitWatchUpdate([]string{}, err)
+		} else {
+			actions, parseErr := FileNotifyInformationParser(watcher.Buffer, watchDirPath, ignorePaths)
+			watcher.EmitWatchUpdate(actions, parseErr)
 		}
+	}
+}
+
+func (watcher *WindowsFileSystemWatcher) EmitWatchUpdate(actions []string, err error) {
+	watcher.WatchUpdateChannel <- WatchUpdate{ 
+		Error: err,
+		Actions: actions,
 	}
 }
 

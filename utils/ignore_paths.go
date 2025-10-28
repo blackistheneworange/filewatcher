@@ -8,17 +8,22 @@ import (
 	"strings"
 )
 
-func GetIgnorePaths(paths *string, parentPath string) ([]string, error) {
+func GetIgnorePaths(paths *string) ([]string, error) {
 	if *paths == "" {
 		return []string{}, nil
 	}
 
 	pathsList := strings.Split(*paths, ",")
+	finalPathsList := make([]string, 0, len(pathsList))
 	var pathErr error
 
-	for idx, path := range pathsList {
+	for _, path := range pathsList {
 		path = strings.TrimSpace(path)
-		path, pathErr = filepath.Abs(filepath.Join(parentPath, path))
+		if len(path) == 0 {
+			continue
+		}
+
+		path, pathErr = filepath.Abs(path)
 		if pathErr != nil {
 			return []string{}, errors.New(fmt.Sprintf("ignore path error: %s",pathErr.Error()))
 		}
@@ -26,8 +31,23 @@ func GetIgnorePaths(paths *string, parentPath string) ([]string, error) {
 		if statErr != nil {
 			return []string{}, errors.New(fmt.Sprintf("ignore path error: %s",statErr.Error()))
 		}
-		pathsList[idx] = path
+		finalPathsList = append(finalPathsList, path)
 	}
 
-	return pathsList, nil
+	return finalPathsList, nil
+}
+
+func SegregateIgnorePaths(ignorePaths []string, watchDirPaths []string) [][]string {
+	segregatedList := make([][]string, len(watchDirPaths))
+
+	for _, ignorePath := range ignorePaths {
+		for idx, watchDirPath := range watchDirPaths {
+			if strings.HasPrefix(ignorePath, watchDirPath) {
+				segregatedList[idx] = append(segregatedList[idx], ignorePath)
+				break;
+			}
+		}
+	}
+
+	return segregatedList
 }

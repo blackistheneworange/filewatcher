@@ -27,9 +27,8 @@ func Fatal(items ...interface{}) {
 }
 
 func Format(separator rune, items ...interface{}) string{
-	formatters := "%s "
-	finalItems := make([]interface{}, 0, len(items)*2)
-	finalItems = append(finalItems, prefix)
+	formatters := ""
+	finalItems := make([]interface{}, 0, len(items)*2-1)
 
 	for idx := range items {
 		formatters += "%v"
