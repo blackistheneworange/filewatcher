@@ -5,16 +5,21 @@ A simple utility to watch and restart on directory changes. Only supported in wi
 
 ## Usage
 
-`filewatcher.exe -exec "node index.js" -watch "./path" -ignore "ignorethisfile.js, alsoignorethis.ts"`
+```
+filewatcher.exe 
+ -exec "node index.js" 
+ -watch "./path,../package" 
+ -ignore "ignorethisfile.js, alsoignorethis.ts"
+ ```
 
 ### -exec
 > The command to be executed which runs the intended application
 
 ### -watch
-> The directory to be watched. This path should always point to a directory
+> CSV of paths of files and directories to be watched
 
 ### -ignore
-> CSV of files and directories to ignore when watching
+> CSV of paths of files and directories to ignore when watching
 
 
 ## Additional Information
