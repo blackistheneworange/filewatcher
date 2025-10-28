@@ -40,7 +40,7 @@ func main() {
 	logger.Log("Listening for changes...")
 
 	handleProcessError(process.StartProcess())
-	
+
 	ch := watcher.Subscribe()
 
 	for idx, watchDirPath := range watchDirPaths {
