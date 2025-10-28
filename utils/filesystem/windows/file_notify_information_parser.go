@@ -43,9 +43,9 @@ func FileNotifyInformationParser(buffer [4096]byte, watchDirPath string, ignoreP
 		var action string;
 		switch entry.Action {
 		case windows.FILE_ACTION_ADDED:
-			action = filename+" added"
+			action = getFormattedWatchDirPath(watchDirPath)+filename+" added"
 		case windows.FILE_ACTION_REMOVED :
-			action = filename+" removed"
+			action = getFormattedWatchDirPath(watchDirPath)+filename+" removed"
 		case windows.FILE_ACTION_MODIFIED:
 			dupEvent, dupEventErr := isDuplicateModifiedEvent(absPath)
 			if dupEventErr != nil {
@@ -54,16 +54,16 @@ func FileNotifyInformationParser(buffer [4096]byte, watchDirPath string, ignoreP
 			if dupEvent {
 				return []string{}, nil
 			}
-			action = filename+" modified"
+			action = getFormattedWatchDirPath(watchDirPath)+filename+" modified"
 		case windows.FILE_ACTION_RENAMED_OLD_NAME:
-			action = filename+" renamed"
+			action = getFormattedWatchDirPath(watchDirPath)+filename+" renamed"
 			oldNameActionIdx = len(actions)
 		case windows.FILE_ACTION_RENAMED_NEW_NAME:
 			if oldNameActionIdx > -1 {
 				actions[oldNameActionIdx] += " to "+filename
 				oldNameActionIdx = -1
 			} else {
-				action = "Renamed to "+filename
+				action = getFormattedWatchDirPath(watchDirPath)+"Renamed to "+filename
 			}
 		}
 		if len(action) > 0 {
@@ -76,6 +76,10 @@ func FileNotifyInformationParser(buffer [4096]byte, watchDirPath string, ignoreP
 		offset += entry.NextEntryOffset
 	}
 	return actions, nil
+}
+
+func getFormattedWatchDirPath(dirPath string) string {
+	return "["+dirPath+"] "
 }
 
 func isValidEvent(absPath string, ignorePaths []string) bool {

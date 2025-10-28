@@ -8,9 +8,9 @@ import (
 	"strings"
 )
 
-func GetIgnorePaths(paths *string) ([]string, error) {
+func GetWatchPaths(paths *string) ([]string, error) {
 	if *paths == "" {
-		return []string{}, nil
+		return []string{}, errors.New("watch path error: No watch paths provided")
 	}
 
 	pathsList := strings.Split(*paths, ",")
@@ -25,11 +25,14 @@ func GetIgnorePaths(paths *string) ([]string, error) {
 
 		path, pathErr = filepath.Abs(path)
 		if pathErr != nil {
-			return []string{}, errors.New(fmt.Sprintf("ignore path error: %s",pathErr.Error()))
+			return []string{}, errors.New(fmt.Sprintf("watch path error: %s",pathErr.Error()))
 		}
-		_, statErr := os.Stat(path)
+		stat, statErr := os.Stat(path)
 		if statErr != nil {
-			return []string{}, errors.New(fmt.Sprintf("ignore path error: %s",statErr.Error()))
+			return []string{}, errors.New(fmt.Sprintf("watch path error: %s",statErr.Error()))
+		}
+		if !stat.IsDir() {
+			return []string{}, errors.New(fmt.Sprintf("watch path error: Provided watch path %s does not point to a directory", path))
 		}
 		finalPathsList = append(finalPathsList, path)
 	}

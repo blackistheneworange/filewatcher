@@ -9,7 +9,7 @@ import (
 )
 
 var execCmd *string = flag.String("exec", "", "Command to execute")
-var watchDir *string = flag.String("watch", "", "Directory path to watch")
+var watchDirs *string = flag.String("watch", "", "Directory paths to watch")
 var ignorePaths *string = flag.String("ignore", "", "Directories/files to ignore when watching")
 
 func main() {
@@ -17,36 +17,39 @@ func main() {
 
 	watcher, watcherErr := filesystem.GetFileSystemWatcher()
 	if watcherErr != nil {
-		panic(logger.Format(0, watcherErr.Error()))
+		logger.Fatal(logger.Format(0, watcherErr.Error()))
 	}
 
 	processManager, processManagerErr := process.GetProcessManager(execCmd)
 	if processManagerErr != nil {
-		panic(logger.Format(0, processManagerErr.Error()))
+		logger.Fatal(logger.Format(0, processManagerErr.Error()))
 	}
 	process := processManager.CreateProcess(*execCmd)
 
-	watchDirPath, watchDirPathErr := utils.GetWatchPath(watchDir)
-	if watchDirPathErr != nil {
-		panic(logger.Format(0, watchDirPathErr.Error()))
+	watchDirPaths, watchDirPathsErr := utils.GetWatchPaths(watchDirs)
+	if watchDirPathsErr != nil {
+		logger.Fatal(logger.Format(0, watchDirPathsErr.Error()))
 	}
 
-	ignorePaths, ignorePathsErr := utils.GetIgnorePaths(ignorePaths, watchDirPath)
+	ignorePaths, ignorePathsErr := utils.GetIgnorePaths(ignorePaths)
 	if ignorePathsErr != nil {
-		panic(logger.Format(0, ignorePathsErr))
+		logger.Fatal(logger.Format(0, ignorePathsErr))
 	}
 
 	logger.Log("Listening for changes...")
 
 	handleProcessError(process.StartProcess())
-
+	
 	ch := watcher.Subscribe()
-	go watcher.Watch(watchDirPath, ignorePaths)
+
+	for _, watchDirPath := range watchDirPaths {
+		go watcher.Watch(watchDirPath, ignorePaths)
+	}
 
 	for {
 		change := <-ch
 		if change.Error != nil {
-			panic(logger.Format(' ', "watch error:", change.Error))
+			logger.Fatal(logger.Format(' ', "watch error:", change.Error))
 		}
 
 		if len(change.Actions) > 0 {
@@ -62,6 +65,6 @@ func main() {
 
 func handleProcessError(err error) {
 	if err != nil {
-		logger.Log("Process crashed. Waiting for changes...")
+		logger.Log(err, "Process crashed. Waiting for changes...")
 	}
 }
